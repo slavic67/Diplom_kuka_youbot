@@ -1,24 +1,27 @@
 import cv2
 import numpy as np
 import time
-import enum
 
-#declare object list
-class Objects(enum.Enum):
-    wheel = 0
-    laser = 1
 
+"""
+information on how to make .cfg and .weights files :
+https://www.youtube.com/watch?v=H3SJcwttTi4&t=1s
+"""
 #config yolo
-net1 = cv2.dnn.readNet("yolo_sources/cap.weights", "yolo_sources/cap.cfg")
-classes = ["cap"]
+net1 = cv2.dnn.readNet("yolo_sources/cap.weights", "yolo_sources/cap.cfg") #our source files
+classes = ["cap"] #our classes
 layer_names = net1.getLayerNames()
 output_layers = [layer_names[i - 1] for i in net1.getUnconnectedOutLayers()]
 
 
 
 
-def multi_object_detect(img):
-    height, width, channels = img.shape
+def find_all_object(img):
+    """The function is designed to search for objects in the photo .
+    An image from the camera is taken as input .
+    The function returns the coordinates of all found objects in the photo .
+    Don 't forget to configure the neural network """
+    height, width, _= img.shape
 
     # Detecting objects
     blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
@@ -40,7 +43,6 @@ def multi_object_detect(img):
             confidence = scores[class_id]
             if confidence > 0.3:
                 # Object detected
-                # print(class_id)
                 center_x = int(detection[0] * width)
                 center_y = int(detection[1] * height)
                 w = int(detection[2] * width)
@@ -57,27 +59,14 @@ def multi_object_detect(img):
     #sort out data
     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
-    # print(boxes)
-    # print(indexes)
-    # print(class_ids)
 
-    return_list=[[],[]]
-    font = cv2.FONT_HERSHEY_PLAIN
+    return_list=[]
     for i in range(len(boxes)):
         if i in indexes:
             x, y, w, h = boxes[i]
             x_c=x+w//2
             y_c=y+h//2
-            #cv2.circle(img, (x_c, y_c), 10, (0, 0, 255), -1)
-            label = str(classes[class_ids[i]])
-            #cv2.rectangle(img, (x, y), (x + w, y + h), (0,255,0), 2)
-            #cv2.putText(img, label, (x, y + 30), font, 3, (0,255,0), 2)
-
-            
-            if class_ids[i]==Objects.wheel.value:
-                return_list[Objects.wheel.value].append([x_c,y_c])
-            if class_ids[i]==Objects.laser.value:
-                return_list[Objects.laser.value].append([x_c,y_c])
+            return_list.append([x_c,y_c])
 
     return return_list
 
@@ -89,7 +78,7 @@ if __name__=='__main__':
         img = cv2.resize(img, (640, 480))
         img = cv2.flip(img, 1)
         start=time.time()
-        return_list=multi_object_detect(img)
+        return_list=find_all_object(img)
         end=time.time()
         cv2.putText(img, "{} fps".format(round(1/(end-start),2)), (20,30), cv2.FONT_HERSHEY_PLAIN, 3, (0,0, 255), 2)
         print(return_list)
