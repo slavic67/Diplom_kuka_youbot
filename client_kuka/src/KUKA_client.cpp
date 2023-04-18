@@ -16,11 +16,11 @@ using namespace std;
 #define YOUBOT_CONFIGURATIONS_DIR "/usr/local/config/"
 
 //начальные значения углов
-float A1=0;
-float A2=0;
-float A3=0;
-float A4=0;
-float A5=0;
+float A1=3.14;
+float A2=1.048;
+float A3=-2.4352;
+float A4=1.7318;
+float A5=2.93;
 
 //main for test on kuka youbot
 
@@ -80,13 +80,13 @@ float A5=0;
 // 			myYouBotManipulator->getArmJoint(4).setData(desiredJointAngle);
 // 			desiredJointAngle.angle = A5 * radian;
 // 			myYouBotManipulator->getArmJoint(5).setData(desiredJointAngle);
-//             SLEEP_MILLISEC(2000);
+//             SLEEP_MILLISEC(5000);
 
 //             //конфигурируем клиента
-//             ros::init(argc,argv,"add_two_ints_client");
+//             ros::init(argc,argv,"kuka_arm_client");
 //             ros::NodeHandle n;
-//             ros::ServiceClient client = n.serviceClient<kuka::AddTwoInts>("add_two_ints");
-//             kuka::AddTwoInts srv;
+//             ros::ServiceClient client = n.serviceClient<kuka::AngleValues>("kuka_arm");
+//             kuka::AngleValues srv;
 
 //             while(true)
 //             {
@@ -97,9 +97,9 @@ float A5=0;
 //                     A4=srv.response.A4_new;
 //                     A5=srv.response.A5_new;
 //                     desiredJointAngle.angle = A4 * radian;
-// 			        myYouBotManipulator->getArmJoint(4).setData(desiredJointAngle);
-// 			        desiredJointAngle.angle = A5* radian;
-// 			        myYouBotManipulator->getArmJoint(5).setData(desiredJointAngle);
+//                     myYouBotManipulator->getArmJoint(4).setData(desiredJointAngle);
+//                     desiredJointAngle.angle = A5* radian;
+//                     myYouBotManipulator->getArmJoint(5).setData(desiredJointAngle);
 //                 }
 //                 SLEEP_MILLISEC(500);
 
@@ -155,7 +155,7 @@ int main(int argc, char **argv)
         cout<<"A4_new is equal "<<srv.response.A4_new<<" "<<"A5_new is equal "<<srv.response.A5_new<<endl;
       }
 
-        break;
+        SLEEP_MILLISEC(1000);
     }
     return 0;
 

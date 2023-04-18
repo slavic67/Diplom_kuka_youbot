@@ -2,7 +2,6 @@ import cv2
 import time
 from neural_network_yolo import find_all_object
 import threading
-import pickle
 import socket
 
 
@@ -16,7 +15,7 @@ def tracking_object():
 
         start=time.time()
         temp=find_all_object(img)
-        print(temp)
+        #print(temp)
         if temp !=[]:
             return_list=temp
         end=time.time()
@@ -37,11 +36,11 @@ def start_server(HOST):
     weight = 640
     height = 480
     # if aspect ratio 16:9
-    weight_diapason = 16 * 9.25
-    height_diapason = 9 * 9.25
+    #weight_diapason = 16 * 9.25
+    #height_diapason = 9 * 9.25
     # if aspect ratio 4:3
-    #weight_diapason = 4 * 34
-    #height_diapason = 3 * 34
+    weight_diapason = 4 * 34
+    height_diapason = 3 * 34
 
 
     while True:
@@ -49,8 +48,10 @@ def start_server(HOST):
         print('Connected from -',addr)
         delta_angle=[(return_list[0][0]-weight//2)/weight*weight_diapason,(return_list[0][1]-height//2)/height*height_diapason]
         return_list=[[weight//2,height//2]]
-        resp=pickle.dumps(delta_angle)
-        conn.send(resp)
+        data=str(delta_angle[0])+' '+str(delta_angle[1])
+        msg=bytes(data,'utf-8')
+        print(delta_angle)
+        conn.send(msg)
         conn.close()
 
 
@@ -59,7 +60,7 @@ if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
 
     HOST = (socket.gethostname(), 10000)
-    return_list = []
+    return_list = [[640//2,480//2]]
 
 
     thread1=threading.Thread(target=tracking_object)

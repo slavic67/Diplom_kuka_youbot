@@ -1,0 +1,70 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(kuka)
+
+## enable C++ 11
+SET(CMAKE_CXX_STANDARD 11)
+
+## build parameters and paths
+SET(CMAKE_BUILD_TYPE Debug) #enable debug mode (e.g. for embedded gdb in eclipse )
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin CACHE PATH "Configure the executable output path.")
+
+find_package(catkin REQUIRED COMPONENTS 
+youbot_driver
+roscpp
+rospy
+std_msgs
+message_generation)
+
+## Generate services in the 'srv' folder
+add_service_files(
+  FILES
+  AngleValues.srv
+  
+)
+
+## Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
+
+catkin_package()
+
+catkin_install_python(PROGRAMS
+  scripts/KUKA_server.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+include_directories(${catkin_INCLUDE_DIRS})
+link_directories(${catkin_LIBRARY_DIRS})
+catkin_package()
+
+add_definitions(-DYOUBOT_CONFIGURATIONS_DIR="${youbot_driver_CONFIG_DIR}")
+
+add_executable(KUKA_client
+  src/KUKA_client.cpp
+)
+
+
+target_link_libraries(KUKA_client 
+	${catkin_LIBRARIES}
+
+)
+
+OPTION(USE_SETCAP "Set permissions to access ethernet interface without sudo" ON)
+
+SET(SUDO_COMMAND gksudo)
+IF($ENV{USE_NORMAL_SUDO})
+    SET(SUDO_COMMAND sudo)
+ENDIF($ENV{USE_NORMAL_SUDO})
+
+IF(USE_SETCAP)
+add_custom_command(TARGET KUKA_client POST_BUILD
+    COMMAND ${SUDO_COMMAND} setcap cap_net_raw+ep $<TARGET_FILE:KUKA_client>
+)    
+endif(USE_SETCAP)
+
+
+install(TARGETS KUKA_client
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
